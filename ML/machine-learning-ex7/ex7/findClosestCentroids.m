@@ -22,6 +22,27 @@ idx = zeros(size(X,1), 1);
 %
 
 
+for i=1:size(idx)
+   this_x = X(i,:);
+   smallest_distance = 0;
+   smallest_index = 0;
+   for j=1:K
+      this_centroid = centroids(j,:);
+      this_distance = this_x - this_centroid;
+      this_distance = this_distance.^2;
+      this_distance = sum(this_distance);
+      if (j==1)
+         smallest_distance = this_distance;
+         smallest_index = j;
+      else
+         if (this_distance < smallest_distance)
+            smallest_distance = this_distance;
+            smallest_index = j;
+          endif
+      endif
+   endfor
+   idx(i) = smallest_index;
+endfor
 
 
 
