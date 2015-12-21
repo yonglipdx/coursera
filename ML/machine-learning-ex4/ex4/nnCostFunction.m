@@ -26,7 +26,7 @@ Theta2 = reshape(nn_params((1 + (hidden_layer_size * (input_layer_size + 1))):en
 m = size(X, 1);
          
 % You need to return the following variables correctly 
-J = 0;
+J = 0;;
 Theta1_grad = zeros(size(Theta1));
 Theta2_grad = zeros(size(Theta2));
 
@@ -66,20 +66,73 @@ Theta2_grad = zeros(size(Theta2));
 
 
 
+a1 = [ones(size(X,1),1) X]; 
+z2 = a1*Theta1'; %m by 25
+a2 = sigmoid(z2); %m by 25
+a2_bias = [ones(size(a2,1),1) a2]; %m by 26
+
+z3 = a2_bias*Theta2'; %m by 10
+a3 = sigmoid(z3); %m by 10 
+
+for i=1:num_labels
+  predict_i = a3(:,i);
+  if i == 0
+    y_i = y == num_labels;
+   else 
+     y_i = y == i;
+   endif  
+   J_i = 0; 
+   J_i += sum((-y_i).*log(predict_i) -(1-y_i).*log(1-predict_i));
+   J_i = J_i/m;
+   J += J_i;
+endfor
+
+theta_1_penaty = sum(sum(Theta1(:,2:end).^2))*lambda/(2*m);
+theta_2_penaty = sum(sum(Theta2(:,2:end).^2))*lambda/(2*m);
+
+J += theta_1_penaty;
+J += theta_2_penaty;
+ 
 
 
+% back propogation 
+
+Y = zeros(size(y), num_labels);
+for i=1:size(y)
+ if (y(i) == 0)
+  Y(i,num_labels) = 1;
+ else
+   Y(i,y(i)) = 1;
+ endif
+endfor
 
 
+d3 = a3 - Y; % m X r 
+d2 = (d3 * Theta2(:,2:end)).*sigmoidGradient(z2); % m X h
+delta1 = d2'*a1; % h X n
+delta2 = d3'*a2_bias; % a2_bias not a2. why?
 
+delta1_size = size(delta1);
+delta2_size = size(delta2);
+Theta1_grad_size = size(Theta1_grad);
+Theta2_grad_size = size(Theta2_grad);
 
+Theta1_grad = delta1/m; 
+Theta2_grad = delta2/m;
+%Theta2_grad = [zeros(size(Theta2_grad,1), 1) Theta2_grad]; 
+ 
+%Regularization of the gradient
 
+Theta1(:,1) = 0;
+Theta2(:,1) = 0;
 
+Theta1 = Theta1*lambda/m;
+Theta2 = Theta2*lambda/m;
 
+Theta1_grad = Theta1_grad + Theta1;
+Theta2_grad = Theta2_grad + Theta2;  
 
-
-
-
-
+ 
 % -------------------------------------------------------------
 
 % =========================================================================
