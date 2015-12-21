@@ -54,6 +54,17 @@ error_val   = zeros(m, 1);
 % ---------------------- Sample Solution ----------------------
 
 
+for i = 1:m
+  thisX = X(1:i,:);
+  thisY = y(1:i);
+  thisTheta = trainLinearReg(thisX, thisY, lambda)
+  [trainingE, grad] = linearRegCostFunction(thisX, thisY, thisTheta, 0);
+  [crossE, grad] = linearRegCostFunction(Xval, yval, thisTheta, 0);
+  error_train(i) = trainingE;
+  error_val(i) = crossE;
+endfor
+
+
 
 
 

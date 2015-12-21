@@ -21,6 +21,21 @@ grad = zeros(size(theta));
 
 
 
+J = sum((X*theta - y).^2 )/(2*m); % 1 by 1
+
+% regulaization_penaty
+theta_square = theta.^2;
+regularization_penaty = 0;
+for i=2:size(theta,1)
+   regularization_penaty += theta_square(i);
+endfor
+regularization_penaty = regularization_penaty*lambda/ (2*m);
+J += regularization_penaty;
+
+
+grad = (X'*(X*theta - y))/m + theta*lambda/m; % columX(thetaRow) by 1
+grad(1) = grad(1) - lambda*theta(1)/m; % 
+
 
 
 
