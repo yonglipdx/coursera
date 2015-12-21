@@ -18,15 +18,12 @@ for iter = 1:num_iters
     %
 
 
-
-
-
-
-
-
-
-
-
+   thetaTemp = theta;
+   diff = X*thetaTemp -y;
+   for i=1:size(theta)
+       diff_theta_i = diff.*X(:,i);
+       theta(i,1) = thetaTemp(i,1) - alpha*(sum(diff_theta_i)/m);
+    end
     % ============================================================
 
     % Save the cost J in every iteration    
