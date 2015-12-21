@@ -42,16 +42,22 @@ Theta_grad = zeros(size(Theta));
 
 
 
+J = sum(sum((((X*(Theta)' - Y).^2).*R)))/2 + lambda*sum(sum(Theta.^2))/2 + lambda*sum(sum(X.^2))/2;
 
+for i = 1:size(X(:,1))
+   X_grad(i,:) = (((Theta*X(i,:)')-Y(i,:)').*R(i,:)')'*Theta + lambda*X(i,:);
+   % Theta*X(i,:) ---> all user's predict rate on movie i    
+   % Y(i,:) ->  all user's actuall rate on movie i.
+   % R(i,:) -> true/false for all user's rating on movie i
+endfor
 
-
-
-
-
-
-
-
-
+ 
+for j = 1:size(Theta(:,1))
+   Theta_grad(j,:) = (((X*Theta(j,:)')-Y(:,j)).*R(:,j))'*X + lambda*Theta(j,:);
+    % X*Theta(j,:) ---> all movie's predict rate by user j 
+   % Y(:,j) ->  All movie's actual rate by user j .
+   % R(:,j) -> true/false for all movie rating by user j
+endfor
 
 
 

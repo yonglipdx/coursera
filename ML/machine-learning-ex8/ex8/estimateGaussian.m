@@ -23,10 +23,13 @@ sigma2 = zeros(n, 1);
 
 
 
+mu = mean(X);
+newX = zeros(m,n);
+for i=1:n
+ newX(:,i) = (X(:,i)-mu(i)).^2;
+endfor
 
-
-
-
+sigma2 = sum(newX)/m; 
 
 
 
