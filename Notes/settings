@@ -1,5 +1,8 @@
 In .vimrc
 
+   #change git default editor:
+   git config --global core.editor [to_gvim_path_without_exe]
+
    #change gvim background color: 
    colorscheme koehler
 
