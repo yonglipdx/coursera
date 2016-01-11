@@ -1,13 +1,14 @@
-In .vimrc
+#change git default editor:
+	Add gvim path to system PATH (e.g C:\Programs Files (x86)\Vim\vim74
+	git config --global core.editor [to_gvim_path_without_exe]
 
-   #change git default editor:
-   git config --global core.editor [to_gvim_path_without_exe]
+#change gvim background color: 
+	In .vimrc
+   	colorscheme koehler
 
-   #change gvim background color: 
-   colorscheme koehler
-
-   # Make vim compatible with Chinese character
-   set encodding=utF8
-   set guifontwide=NSimSun
+# Make gvim compatible with Chinese character
+	In .vimrc:
+   	set encodding=utF8
+   	set guifontwide=NSimSun
 
 
