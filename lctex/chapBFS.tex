@@ -42,6 +42,11 @@ Note:
 \begin{Code}
 //LeetCode, Word Ladder
 // 时间复杂度O(n)，空间复杂度O(n)
+
+// LD:
+// use swap for 恢复原单词.
+// use swap to switch stack one and stack two in while loop.
+
 class Solution {
 public:
     int ladderLength(const string& start, const string &end,
@@ -150,6 +155,19 @@ Note:
 \begin{Code}
 //LeetCode, Word Ladder II
 // 时间复杂度O(n)，空间复杂度O(n)
+
+
+// LD:
+// father[state].push_back(word);
+// ＦＡＴＨＴＥＲ［Ａ］包含了所有从A到EＮＤ方向NODES.
+// 不用担心是否有多余的NODE被PATH 收录,原因是GEN_PATH 的起始点是END.
+// TODO: Why the follwings was not used in ladder one problem
+          先将本层全部置为已访问，防止同层之间互相指向
+          for (const auto& word : current)
+                visited.insert(word);
+
+
+
 class Solution {
 public:
     vector<vector<string> > findLadders(string start, string end,
@@ -207,6 +225,7 @@ public:
         }
         return result;
     }
+
 private:
     void gen_path(unordered_map<string, vector<string> > &father,
             vector<string> &path, const string &start, const string &word,
@@ -267,6 +286,12 @@ X O X X
 \begin{Code}
 // LeetCode, Surrounded Regions
 // BFS，时间复杂度O(n)，空间复杂度O(n)
+
+//LD:
+// Region is an island. 0 on the boundary make it Peninsula
+//　从四边界的０开始做BＦＳ．可以触及到的是FＡＫＥ０．
+
+
 class Solution {
 public:
     void solve(vector<vector<char>> &board) {
