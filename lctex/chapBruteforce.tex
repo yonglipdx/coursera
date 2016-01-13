@@ -149,6 +149,10 @@ public:
         const size_t n = S.size();
         vector<int> v;
 
+        // LD: 
+        // for-1: loop through 0 to binary number 111111 (#1 represent size of input chars)
+        // for-1: include char S[j] is xxxxj(==1)xxxxx
+
         for (size_t i = 0; i < 1 << n; i++) {
             for (size_t j = 0; j < n; j++) {
                 if (i & 1 << j) v.push_back(S[j]);
