@@ -33,7 +33,7 @@ For example, If \code{S = [1,2,3]}, a solution is:
 
 
 \subsubsection{增量构造法}
-每个元素，都有两种选择，选或者不选。
+每个元素，都有两种选择，选或者不选----。
 
 \begin{Code}
 // LeetCode, Subsets
@@ -171,6 +171,10 @@ public:
         vector<vector<int> > result;
         const size_t n = S.size();
         vector<int> v;
+
+        // LD: 
+        // for-1: loop through 0 to binary number 111111 (#1 represent size of input chars)
+        // for-1: include char S[j] is xxxxj(==1)xxxxx
 
         for (size_t i = 0; i < 1 << n; i++) {
             for (size_t j = 0; j < n; j++) {
