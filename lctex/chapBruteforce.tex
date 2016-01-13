@@ -131,6 +131,29 @@ public:
 \end{Code}
 
 
+\subsubsection{增量构造法2}
+\begin{Code}
+// LeetCode, Subsets
+// 迭代版2，时间复杂度O(2^n)，空间复杂度O(1)
+// The following is similar to above 
+class Solution {
+public:
+	static void subsets2(const vector<int> &S, vector< vector<int> > & result){
+	   vector<int> empty;
+	   result.push_back(empty);
+	   for (int i=0; i< S.size(); i++){ // for each entry, double the result size by adding this entry.
+	      int size = result.size();
+	      for (int j= 0; j<size;j++){
+		 vector<int> b = result[j];
+		 b.push_back(S[i]);
+		 result.push_back(b);
+	      }
+	   }
+	}
+};
+\end{Code}
+
+
 \subsubsection{二进制法}
 本方法的前提是：集合的元素不超过int位数。用一个int整数表示位向量，第$i$位为1，则表示选择$S[i]$，为0则不选择。例如\fn{S=\{A,B,C,D\}}，则\fn{0110=6}表示子集\fn{\{B,C\}}。
 
