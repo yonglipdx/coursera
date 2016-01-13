@@ -11,4 +11,10 @@
    	set encodding=utF8
    	set guifontwide=NSimSun
 
+# to solve conflict issue simpliar to sync/commit in perforce.
+# git stash
+# git pull
+# git stash pop
+#  resolve conflict if any
+#  git push origin master
 
