@@ -26,13 +26,14 @@ For the purpose of this problem, we define empty string as valid palindrome.
 \begin{Code}
 // Leet Code, Valid Palindrome
 // 时间复杂度O(n)，空间复杂度O(1)
+
 class Solution {
 public:
     bool isPalindrome(string s) {
-        transform(s.begin(), s.end(), s.begin(), ::tolower);
-        auto left = s.begin(), right = prev(s.end());
+        transform(s.begin(), s.end(), s.begin(), ::tolower); // LD: to lower case in C++11.
+        auto left = s.begin(), right = prev(s.end());        // LD: auto right = prev(s.end());
         while (left < right) {
-            if (!::isalnum(*left))  ++left;
+            if (!::isalnum(*left))  ++left;                  // LD: skip white space: isalnum(*right);
             else if (!::isalnum(*right)) --right;
             else if (*left != *right) return false;
             else{ left++, right--; }
@@ -303,6 +304,7 @@ public:
 \subsubsection{描述}
 Given a string $S$, find the longest palindromic substring in $S$. You may assume that the maximum length of $S$ is 1000, and there exists one unique longest palindromic substring.
 
+// PAUSE
 
 \subsubsection{分析}
 最长回文子串，非常经典的题。

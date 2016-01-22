@@ -18,3 +18,8 @@
 #  resolve conflict if any
 #  git push origin master
 
+# syntax highlight in gvim
+        set syntax=cpp
+        set syntax=lex
+ 
+
