@@ -35,6 +35,11 @@ For example, If \code{S = [1,2,3]}, a solution is:
 \subsubsection{增量构造法}
 每个元素，都有两种选择，选或者不选----。
 
+//LD:
+// Recursion is too expensive for the problem. 
+// This code works. Not clear about the purpose of the last line:
+   path.pop_back();
+
 \begin{Code}
 // LeetCode, Subsets
 // 增量构造法，深搜，时间复杂度O(2^n)，空间复杂度O(n)
@@ -135,7 +140,7 @@ public:
 \begin{Code}
 // LeetCode, Subsets
 // 迭代版2，时间复杂度O(2^n)，空间复杂度O(1)
-// The following is similar to above 
+// The following is similar to above soltuion
 class Solution {
 public:
 	static void subsets2(const vector<int> &S, vector< vector<int> > & result){

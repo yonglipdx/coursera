@@ -22,4 +22,64 @@
         set syntax=cpp
         set syntax=lex
  
+# Lex
+	Scanner produces a stream of tokens from the input source.
+	lex is a scanner generator.
+	lex input is set of regular expressions and associated action (wirtten in C)
+	lex output is a table-driven scanner (lex.yy.c)
+	flex: an open source implementation of lex.
 
+	# lex input
+		first part (optional)
+		table size demision
+		defination of text replacement
+		global C code (specail syntax required)
+		...
+		%% -----> termination of FIRST PART
+		pattern	action
+		regular expression and action
+		action and be C statment or block of C code.
+		...
+	 	%% ------> termination of SECOND PARt
+		Third PART (optional)
+		C code simplied used as is.
+
+	Example: filename: exl.l
+	--------
+	%%
+	"hello world"	printf("goodbye\n");
+	.		;  ----> ignore everthing other than "hello world"
+	%%
+	--------
+
+	lex exl.1 ----> generate a scanner, saved as lex.yy.c
+	cc lex.yy.c -ll  (with -ll option main() is grab from the lex library)
+
+
+	Example2: suppose we have configuration file "config.in"
+	--------
+
+# yacc
+
+
+
+# char* const vs    const char*
+	according to the standard, const modifies the element directly to its left. 
+	The use of const at the beginning of a declaration is just a convenient mental shortcut. 
+	So the following two statements are equivalent:
+	char const * pointerToConstantContent1;
+	const char * pointerToConstantContent2;
+
+	In order to ensure the pointer itself is not modified, 
+	const should be placed after the asterisk:
+	char * const constantPointerToMutableContent;
+
+	To protect both the pointer and the content to which it points, use two consts.
+        char const * const constantPointerToConstantContent;
+	
+	
+
+
+
+
+	
