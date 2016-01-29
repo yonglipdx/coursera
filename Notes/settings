@@ -79,6 +79,29 @@
 	
 	
 
+# stringstream:
+	example1: 
+	  string a("123");
+          stringstream ss(a);
+	  ss << "456"
+	  cout << aa.str(); ---> 456
+
+        example2:
+	  string a("123");
+          stringstream ss("");
+	  ss << a << << "456"
+	  cout << aa.str(); ---> 123456
+
+# ssize_t size_t
+
+        to avoid i == -1
+
+        size_t i: 
+                 if (i > -1) // not OK since i always > -1
+                 use i< (size_t)-1  to make sure i > -1;
+
+        ssize_t i: 
+		 i > -1 is OK since i could be -1 in ssize_t
 
 
 
