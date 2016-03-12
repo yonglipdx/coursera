@@ -451,6 +451,36 @@
 	16. use ordered containers (eg. map, set) if need to iterate over their elements in order.
 	17 hash function obtained by combining standard hash functions for elements using exclusive or are often good.
 
+*** Algorithms
+	void f(vector<Entry>& vec, list<entry>& lst){
+		sort(vec.begin(), vec.end()));
+		unique_copy(vec.begin(), vec.end(), lst.begin());
+	}
+	in this example, to write the output to list, we need specify the lst element to be written. if more elements to 
+	be written, the elements followed the initial element will be overwritten. Thus, to avoid error, 1st must have as 
+	many element as there are unique values in vec. 
+   
+	If we want to place the unique elements in a new container, we could have done:
+	
+	list<Entry> f(vector<Entry>& vec)
+	{
+		list<Entry> res;
+		sort(vec.begin(), vec.end());
+		unique(vec.begin(), vec.end(), back_inserter(res));
+		return res;
+	}
+
+	the call back_inserter(res) construct an iterator for res that adds elements at the end of the container, entending
+	container to make room for them. This save us from first having to allocate a fixed amount of space and then filling i1.t.
+	back_inserter eliminate the C-style error-prone realloc().
+	Standard-library list has a move constructor that make return res by value efficient.
+	Q: --> how move constructor is selected instead of copy?
+	
+	
+
+
+	
+	
 
 # VI
    set spell spelllang=en_us
