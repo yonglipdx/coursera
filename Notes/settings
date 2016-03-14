@@ -584,6 +584,181 @@
    29. A predicate must not modify its argument.
    
 
+*** Utilities
+   1. The standard library components are designed not to leak resources. 
+   2. In <memory> standard library provide:
+
+   3. **** unique_ptr: represent unique ownership  ---> moved
+      void (int i, int j){
+         X *p = new X;
+         unique_ptr<X> sp {new X};
+
+         if (i < 99 ) throw Z{}; // may thrown an exception
+         if (j < 77) return;     // may return "early"
+
+         p->do_sth();            // may throw an exception
+         sp->do_sth;             // may throw an exception
+         //
+
+         delte p; // this may not work in case of exception, early return..
+      }
+   
+   4. *** shared_ptr: represent shared ownership ----> copied. The shared_ptrS for an object share ownership of an object and
+                  that object is destroyed when the last of its shared_ptrS is destroyed. 
+        void f(shared_ptr<fstream>);
+        void g(shared_ptr<fstream>);
+
+        void user(const string& name, ios_base::openmode mode){
+           shared_ptr<fstream> fp {new fstream(name, mode))};
+           if (!*fp) throw No_file{};
+
+           f(fp);
+           g(fp);
+           //..
+        }
+
+        Now the file opened by fp's constructor will be closed by the last function to (explicitly or implicitly) destroy a copy of fp.
+        Not that f() or g() may spawn a task holding a copy of fp or in some other way store a copy that outlives user(). Thus, shared_ptr
+        provides a form of garbage collection that respects the destructor-based resource management of the memory-managed objects.  this 
+        is neight cost free nor exorbitantly expensive. but it does make the lifetime of the shared object hard to predict. Use shared_ptr 
+        only if you actually need shared ownership.
+
+    5. make_shared()
+
+      struct S{
+         int i;
+         string s;
+         double d;
+      };
+
+      shared_ptr<S> p1 {new S{1, "First, Last", 3.14}};
+      ||      
+      auto p1 = make_shared_<S>(1, "First,Last", 3.14);
+
+      However there is no standard-library make_unique which can be defined as:
+      template<typename T, typename... Args>
+      unique_ptr<T> make_unique(Args&&... args){
+         return std::unique_ptr<T>{new  T{std::forward<Args>(args)...}};
+      }
+      now, we can use
+      auto p1 = make_unique<S>(1, "First,Last", 3.14);
+
+   6. smart pointer are still the second choice for resource management - after containers and other types that
+      manage their resources at a higher conceptual level. 
+      shared_ptr becomes obvious choice when we need pointers (or references) to refer to the shared object.
+      unique_ptr becomes the obvious choice we we refer to a polymorphic object, we need a pointer(or reference) 
+      because we don't know the exact type of the object referred to.
+      a shared polymorphic object typically requires shared_ptrS.
+
+   7. Almost containers
+      T[N]         Built-in array: a fixed-size continuously allocated sequence of N elements of type T; implicitly converts to a T∗
+      array<T,N>   A fixed-size continuously allocated sequence of N elements of type T; like the built-in array, but with most problems solved
+      bitset<N>    A fixed-size sequence of N bits
+      vector<bool> A sequence of bits compactly stored in a specialization of vector
+      pair<T,U>    Two elements of types T and U
+      tuple<T...>  A sequence of an arbitrary number of elements of arbitrary types
+      basic_string<C> A sequence of characters of type C; provides string operations
+      valarray<T>  An array of numeric values of type T; provides numeric operations
+
+      • pair and tuple are heterogeneous; all other containers are homogeneous (all elements are of the same type).
+      • array, vector, and tuple elements are contiguously allocated; forward_list and map are linked structures.
+      • bitset and vector<bool> hold bits and access them through proxy objects; all other standard-library
+        containers can hold a variety of types and access elements directly.
+      • basic_string requires its elements to be some form of character and to provide string manipulation, 
+        such as concatenation and locale-sensitive operations
+      • valarray requires its elements to be numbers and to provide numerical operations.
+
+   8. array. defined in <array> is a fixed-size sequence of elements of a given type where the number of elements is specified in
+             compile time. Thus, an array con be allocated with its elements on the stack. 
+         array<int,3> a1 = {1,2,3}; // OK
+         array<int>   ax = {1,2,3}; // error size not specified
+         array<int, n>   ax = {1,2,3}; // error size not constant expression.
+         
+         when necessary, an array can be explicitly passed to a C-style function that expect a pointer.
+         Occasionally, there is significant performance advantage to be had by directly accessing elements 
+         allocated on the stack rather than allocating elements on the free store. 
+         but be careful that stack is limited resource(especially on some embedded systems) and stack overflow is nasty.
+         
+         array vs build-in array:
+         1. array know its size
+         2. it can be copied (using = or initialization)
+         3. prevent nasty conversion to pointer, example:
+
+            void h()
+            {
+               Circle a1[10];
+               array<Circle,10> a2;
+               // ...
+               Shape∗ p1 = a1; // OK: disaster waiting to happen
+               Shape∗ p2 = a2; // error : no conversion of array<Circle,10> to Shape* so that p2[3].draw() is avoid
+               p1[3].draw(); // disaster
+            }
+ 
+   9. bitset： class bitset<N> provide a sequence of N bits [0:N) where N is known at compile time. 
+               For sets of bits that don't fit inot a long long int, uisng a bitset is much more convenient than using integers directly. 
+               for smaller sets, bitset is usually optimized. If you want to name the bits, rather than numbering them, you can use a set or 
+               an enumeration. 
+
+         A bit set can be initialized with an integer or a string:
+         bitset<9> bs1{"110001111"};
+         bitset<9> bs2{399};
+
+      The usual bitwise operation can be applied, as can left- and right-shift operations (<< and >>):
+         bitset<9> bs3 = ˜bs1; // complement: bs3=="001110000"
+         bitset<9> bs4 = bs1&bs3; // all zeros
+         bitset<9> bs5 = bs1<<2; // shift left: bs5 = "111000000"
+      the shift operators "shifts in" zeros.
+
+      operations to_ullong() and to_string() provide the inverse operations to the constructors. 
+      
+      void binary(int i)
+      {
+         bitset<8xsizeof(int)> b = i; // assume 8-bit byte (see also §12.7)
+         cout << b.to_string() << '\n'; // wr ite out the bits of i
+         // cout << b << '\n'; // write out the bits of i--> same as above
+      }
+
+   10. pair, tuple
+      tuple<string,int,double> t2{"Sild",123, 3.14}; // the type is explicitly specified
+      auto t = make_tuple(string{"Herring"},10, 1.23); // the type is deduced to tuple<string,int,double>
+      string s = get<0>(t); // get first element of tuple: "Herring"
+      int x = get<1>(t); // 10
+      double d = get<2>(t); // 1.23
+
+   11. Time <chrono>
+      using namespace std::chrono; // see §3.3
+      auto t0 = high_resolution_clock::now();
+      do_work();
+      auto t1 = high_resolution_clock::now();
+      cout << duration_cast<milliseconds>(t1−t0).count() << "msec\n";
+      
+
+         
+
+
+
+            
+
+   
+
+      
+
+
+      
+
+            
+
+
+      
+
+    
+
+
+   
+   
+
+
+
 
       
 
