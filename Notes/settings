@@ -695,7 +695,7 @@
             }
  
    9. bitset： class bitset<N> provide a sequence of N bits [0:N) where N is known at compile time. 
-               For sets of bits that don't fit inot a long long int, uisng a bitset is much more convenient than using integers directly. 
+               For sets of bits that donot fit inot a long long int, uisng a bitset is much more convenient than using integers directly. 
                for smaller sets, bitset is usually optimized. If you want to name the bits, rather than numbering them, you can use a set or 
                an enumeration. 
 
@@ -731,67 +731,200 @@
       do_work();
       auto t1 = high_resolution_clock::now();
       cout << duration_cast<milliseconds>(t1−t0).count() << "msec\n";
-      
 
-         
+	12. Function adapters
+		A function adaptor takes a function as argument and returns a function object that can be used to invoke the original
+		function. The standard library provides bind() and mem_fn() adaptors to do argument binding, also called Currying or partial evaluation. 
+		Binders were heavily used in the past, but most uses seem to be more easily expressed using lambdas.
+
+	13. Bind()
+		Given a function and a set of arguments, bind() produces a function object that can be called with "the remaining" argument of the function.
+
+		using namespace placeholders; // std::placeholders is part of <functional>
+		void original_f(int, const string&)
+		auto g= bind(original_f,2,_1) // bind original_f first argument to 2
+
+		_1 argument to the binder is a placeholder telling bind() where arguments to the resulting function object should go.
+		In this case, g() (first) argument is used as original_f second argument.
+
+		original_f(2,"hello");
+		g("hello") // same as above call  
+
+		To bind arguments for an overloaded function, we have to explicitly state which version of the function we want to bind.
+
+		int pow(int, int);
+		double pow(double, double); //pow is overloaded
+		
+		auto pow2 = bind(pow,_1, 2); // error. Which pow()?
+		auto pow2 = bind((double(*)(double, double))pow,_1, 2) //OK
+
+	14. mem_fn()
+		mem_fn(mf) produces a function object that can be called as a nonmember function. 
+
+		void user(Shape* p){
+			p->draw();
+			auto draw = mem_fn(&Shape::draw);
+			draw(p);
+		}
+
+		The major used of mem_fu() is when an algorithm requires an operation to be called as a nonmember function. For example:
+
+		void draw_all(vector<Shape*>& v){
+			for_each(v.begin(), v.end(), mem_fn(&Shape::draw));
+		}
+		then mem_fn() can be seen as a mapping from the object-oriented calling style to the functional one.
+		often, lambdas provide a simple and general alternative to binders. For example:
+		void draw_all(vector<Shape*>& v){
+			for_each(v.begin(), v.end(), [](Shape* p){p->draw();});
+		}
+
+	15. function: 
+		The starndard-library function is a type that can hold any object you can invoke the call operator ().
+		-> an object of type function is a function object. 
+
+		int round(double x) {return staic_case<int>(floor(x=0.5));}  // conventional rounding
+		function<int(double)> f; //f can hold anything that can be called with a double and return an int.
+
+		enum class Round_style (truncate, round};
+
+		struct Round {	// function object carrying a state
+			Round_style s;
+			Round(Round_style ss):s(ss){};
+			int operator()(double x) const {return static_case<int>((s==Round_style::round)? (x+0.5):x);};
+			// use staic_cast to make it explicit that i want to return an int.
+
+
+		void test(){
+
+         function<int(double)> f;
+
+			f = round;
+			cout << f(7.6) // ------> 8
+
+			f = Round(Round_style::truncate);
+			count << f(7.6); // -----> 7
+
+		   Round_style style = Round_style::round;
+			f = [style](double x){return static_castKint>((style==Round_style::round)? x+0.5:x);};	
+			cout << f(7.6)  ----------> 8. call lambda
+
+			vector<double> v{7.6};
+			f = Round(Round_style::round);
+			std::transform(v.begin(), v.end), v.begin(), f); // pass to algorithm
+			cout << v[0]; -------------> 8. //transformed by the lambda
+
+			Obviously, functions are useful for callbacks, for passing operations as arguments, etc.
+
+	16.type function is a function that is evaluated at compile-time given a type as its argument or retuning a type.
+		The standard library privides a variety type functions.
+		
+		for numerical types, numeric_limits from <limits> presents a variety of useful info.
+
+			constexpr float min = numeric_limits<float>::min();
+			constexpr int szi = sizeof(int);
+		such type function for compiler-time computation that allow tigher type checking and better performance.
+		use such features is often call metaprogramming or template metaprogramming (with tempalte is involved).
+
+      ---> iterator_traits 
+			exampkle: std::sort need random access to the sequence which much work on random-access iterators. in this case, 
+			forward_list(singly-linked list) which offer forward iterators cannot be used directly for sort()
+			std:: iterator_traits allows us to check which kind of iterator is supported. 
+
+			template<typename Ran> // for random-access iterators
+			void sort_helper(Ran beg, Ran end, random_access_iterator_tag) // we can subscript into [beg:end)
+			{
+				sort(beg,end); // just sort it
+			}
+
+			template<typename For> // for forward iterators
+			void sort_helper(For beg, For end, forward_iterator_tag) // we can traverse [beg:end)
+			{
+				vector<Value_type<For>> v {beg,end}; // initialize a vector from [beg:end)
+				sor t(v.begin(),v.end());
+				copy(v.begin(),v.end(),beg); // copy the elements back
+			}
+
+			Value_type<For> is the type of For-s elements., called it-s value type. Every std iterator has a member value_type.
+
+			I get the Value_type<For> notation by defining a type alias.
+         template<typename C>
+				using Value_type = typename C::value_type; //C-s value type
+
+			Thus, v is a vector<X> where X is the element type of the input sequence.
+
+			the real magic is in the selection of helper functions:
+
+			template<typename C>
+			void sort(C& c)
+			{
+				using Iter - Iterator_type<C>;
+				ort_helper(c.begin(), c.end(), Iterator_category<Iter>{});
+			}
+
+         Above example uses two type functions:
+					Iterator_type<C>
+						 return C::iterator // iterator type of C
+					Iterator_category<Iter>{} 
+						 constructs a "tag" value indicating the kind of iterator provided:
+							1. std::random_access_iterator_tag if C-s iterator supports random access
+							2. std::forward_iterator_tag if C-s iterator supports random access
+
+			The standard-library support for techniques for using iterators, such as tag dispatch, comes in the form of a simple class template iterator_traits from <iterator>.
+			This allows simple definitions of the type functions used in sor t():
+
+				template<typename C>
+			  		 using Iterator_type = typename C::iterator; // C’s iterator type
+
+				template<typename Iter>
+					using Iterator_category = typename std::iterator_traits<Iter>::iterator_category; // Iter’s categor y
+
+				If you don’t want to know what kind of ‘‘compile-time type magic’’ is used to provide the standardlibrary
+				features, you are free to ignore facilities such as iterator_traits. But then you can’t use the
+				techniques they support to improve your own code.
+			
 
 
 
-            
+		 ---> Type predicates in <type_traits>
+			std:: type predicate a simple type function to answer a fundamental quesiton about type: 
+			bool b1 = ls_arithmatic<int>();  // Yes
+			bool b1 = ls_arithmatic<string>(); //No
 
-   
+			is_class, is_pod, is_literal_type, has_virtual_destructor, is_base_of.  They are most useful when we write templates
 
-      
-
-
-      
-
-            
-
-
-      
-
-    
-
-
-   
-   
-
-
-
-
-      
-
-
-
-      
-      
-
-
-
-
-         
-
-
-
-      
-
-
-
-
+	17. A library doesnot have to be large or complicated to be useful
+	18. A resource is anything that has to be acquired and (explicity or implicityly) released.
+	19. Use resource handler to manage resources (RAII).
+	20. User unique_ptr to refer to objects of polymorphics type
+	21. Uee shared_ptr to refer to shared obejcts.
+	22. Prefer uique_ptr to shared_ptr;
+	23. use arry where you need a sequence with a constexpr
+	24. Prefer array over build-in arrays.
+	25. Uer bitset if you need N bits and N is not necessarily the number of bits in a built-in integer type
+	26. when using pair/tuple, consider make_pair/tuple() for type deduction.
+	27. Time your programs before making measurements with proper units.
+	28. Often, a lambda is an alternative to using bind() or men_fn()
+	29. use bin() to create variants of functions and function objects
+	30. Use mem_fn() to create function objects that can invoke a member function when called using the traditionally  function call notation.
+	31. Use function when you need to store sth that can be called
+	32. You can write code to explicitly depend on properties of types.
+	
+			
+		
 
 	
-	
+			
+			
+			
 
-
-	
-	
+		
+		
 
 # VI
    set spell spelllang=en_us
    set syntax=c++/java/latex/python...
    set tabstop=3 softtabstop=0 noexpandtab shiftwidth=3
-   
+   set guifont=Lucida_Console:h10  
 
 #change git default editor:
 	Add gvim path to system PATH (e.g C:\Programs Files (x86)\Vim\vim74
