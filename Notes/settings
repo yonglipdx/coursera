@@ -617,7 +617,7 @@
            //..
         }
 
-        Now the file opened by fp's constructor will be closed by the last function to (explicitly or implicitly) destroy a copy of fp.
+        Now the file opened by fp-s constructor will be closed by the last function to (explicitly or implicitly) destroy a copy of fp.
         Not that f() or g() may spawn a task holding a copy of fp or in some other way store a copy that outlives user(). Thus, shared_ptr
         provides a form of garbage collection that respects the destructor-based resource management of the memory-managed objects.  this 
         is neight cost free nor exorbitantly expensive. but it does make the lifetime of the shared object hard to predict. Use shared_ptr 
@@ -647,7 +647,7 @@
       manage their resources at a higher conceptual level. 
       shared_ptr becomes obvious choice when we need pointers (or references) to refer to the shared object.
       unique_ptr becomes the obvious choice we we refer to a polymorphic object, we need a pointer(or reference) 
-      because we don't know the exact type of the object referred to.
+      because we donot know the exact type of the object referred to.
       a shared polymorphic object typically requires shared_ptrS.
 
    7. Almost containers
@@ -908,23 +908,387 @@
 	30. Use mem_fn() to create function objects that can invoke a member function when called using the traditionally  function call notation.
 	31. Use function when you need to store sth that can be called
 	32. You can write code to explicitly depend on properties of types.
-	
-			
-		
 
-	
-			
-			
-			
+*** Numeric 
 
+	1. Mathematical functions <cmath>
+		abs(x) Absolute value
+		  ceil(x) Smallest integer >= x
+		  floor(x) Largest integer <= x
+		  sqr t(x) Square root; x must be non-negative
+		  cos(x) Cosine
+		  sin(x) Sine
+		  tan(x) Tangent
+		  acos(x) Arccosine; the result is non-negative
+		  asin(x) Arcsine; the result nearest to 0 is returned
+		  atan(x) Arctangent
+		  sinh(x) Hyperbolic sine
+		  cosh(x) Hyperbolic cosine
+		  tanh(x) Hyperbolic tangent
+		  exp(x) Base e exponential
+		  log(x) Natural logarithm, base e; x must be positive
+		  log10(x) Base 10 logarithm		
+		Error are reported from <cerrno> 
+	   domain error: errno->EDOM 
+      range error:  errno-> ERANGE 
+
+		void f(){
+			errno = 0;
+			sqrt(-1);
+			if (errno == EDOM){
+				cerr << "sqrt() not defined for negative argument"
+
+			error = 0; // clear old error state
+			pow(numerica_limits<double>::max();2)
+			if (errno == ERANGE)
+				cerr << "result of pow() too large to represent as a double";
+		}
+	
+	2. Numerical Algorithms <numeric>
+		A small set of generalized numerical algorithms.
+		x=accumulate(b,e,i)					x is the sum of the elements of [b:e)
+		x=accumulate(b,e,i,f)				accululate using f instead of =
+		x=inner_product(b,e,b2,i)			x is the inner product of [b:e) and [b2:b2+(e-b))
+													that is, the sum of i and (*p1)(*p2) for each p1
+													in [b:e) and the corresponsing p2 in [b2:b2+(e-b))
+		x=inner_product*b2,e,b2,i,f,f2) 	iner_product using f and f2 inst0ad of + and *
+		x=partial_sum(b,3,out) 				Element i of [out:p) is the sum of of elements [b:b+i]
+		x=partial_sum(b,3,out,f) 		   partial_sum using f instead of +
+		p=adjacent_difference(b,e,out)
+		p=adjacent_difference(b,e,out,f)
+		iota(b,e,v)								For each element in [b:e) assign ++v; thus the sequence becomes v+1, v+2...
+			
+		These algorithms work for every standard-library sequence and can have operations supplied as arguments.
+	
+	3. Complex number	<comlex> 
+		the standard library complex is a template
+		template<typename Scalar>
+		class complex{
+			public:
+				complex(const& Scalar& re={}, const Scalar& im={});
+				//...
+		}
+
+		The usual arithmetic operations and the most common mathematical functions are supported for complex numbers.
+		void f(complex<float> fl, complex<double> db){
+			complex<long double> ld{fl+sqrt(db)};
+			db += fl*3;
+			fl = pow(1/f1,2);
+		}
+		The sqrt() and pow() are among the usual mathematical functions defined in  <complex>
+
+	4. Random Numbers
+		A random number consist of two parts.
+		1. An engine that produces a sequence of random or pseudo-random values.
+		2. A distribution that maps those values into a mathematical distribution in a range.
+			uniform_int_distribution, normal_distribution, exponential_distribution. 
+
+		using my_engine = default_random_engine;					// type of engine
+		using my_distribution = uniform_int_distribution<>		// type of distribution
+		my_engine re{};													// the default engine
+		my_distribution one_to_six {1,6};							// distribution that maps to the ints 1..6
+		auto die = bind(one_to_six,re);								// make a generator
+		int x = die();														// roll the die: x becomes a value in [1:6]	
+
+	5. Vector Arithmetic <valarray>
+		vallarray is less general and more amenable to optimization for numerical computation than <vector>
+
+		template<typename T>
+		class valarray {
+			//...
+		}
+
+		The usual arithmetic operations and the most common mathematical functions are supported for valarrays.
+		void f(valarray<double>& a1, valarray<double>& a2){
+			valarray<double> a = a1*3.14 + a2/a1;  		// numeric array operations*,+,/ and =
+			a2 += a1*3.14;
+			a = abs(a);
+			double d = a2[7];
+			//...
+		}
+		In particular, valarray offers stride access to help multidimensional computations.
+
+	6. Numeric Limits <limits>
+		<limits> provide classes that describe the properties of built-in types - such as the maximum 
+		exponent of a float or the number of bytes in an int. 
+		
+		static_assert(numeric_limits<char>::is_signed,"unsigned characters!");
+		static_assert(1000000<numeric_limits<int>::max(),"small ints!");  // Ok since numeric_limits<int>::max() is a constexpr function()
+
+		Use numeric_limits to check that the numeric types are adequate for their use
+
+*** Concurrency
+	The standard-library support is primarily aimed at supporting systems-level concurrency rather than directly providing sophisticated
+	higher-level concurrency models. Those can be supplied as libraries built suing the standard-library facilities.
+	The STD supports concurrent execution of multiple threads in a single address space. To allow that, C++ provides a suitable memory model and 
+	a set of atomic operations. 
+	The atomic operations allows lock-free programming.
+	The memory model ensures that as long as a programmer avoids data races(uncontrolled concurrent access to mutable data), everything works 
+	as one wold naively expect. However, most users wills ee concurrency only in terms of the standard library and libraries built on top of that.
+
+	1. Tasks and threads
+		we call a computation that can potentially be executed concurrently with other computations a task. 
+		A thread is the system-level representation of a task in a program.  A task to be executed concurrently with other tasks is launched by 
+		constructing a std::thread with the task as its arguments.
+
+		void f();					// function
+		struct F{					// function object
+			void operator()() 	// F-s call operator
+		};
+		
+		void user(){
+			thread t1 {f};
+			thread t2(F()};
+			t1.join();
+			t2.join();
+		}
+
+		The joins()s ensure user() stay alive until threads have completed. 
+		join means to wait for the thread to terminate.
+		threads of a program share a single address space. 
+
+		void f() {cout << "Hello";}
+	 	struct F{
+			void operator()(){ count << "Parallel World!\n";}
+		}
+		A bad example for above user() as f and F() use the obejct cout without any form of synchronization. 
+		The result ouput would be unpredictable. An combined message "PaHeralllel o world!" may reached.
+
+		The simplest way of thinking of a concurrent task is as a function that happens to run concurrently with its
+		caller. That that to work, we just have to pass arguments, get a result back, and make sure that there is no 
+		use of shared data in between (no data races).
+
+	2. Passing arguments.
+		
+		void f(vector<double>& v);		
+		struct F{
+			vector<double>& v;
+			F(vector<double>&vv:v(vv));
+			void operator()();
+		};
+
+		int main){
+			vector<double> some_vec{1,2,3,5};
+			vector<double> vec2{10, 8, 0, 11,12};
+			thread t1 {f,ref(some_vec)}
+			thread t2 {F(vec2}};
+
+			t1.join();
+			t2.join();
+		}
+
+		-->Problem: be careful that the vectors can be modified somewhere else as they are passed by reference
+			
+	3. returning results 
+
+		-->Answer: A common techniques to avoid the above pitfall is to use const input and seperate ouput
+
+		void f(const vector<double>& v, double∗ res); // take input from v; place result in *res
+
+		class F {
+		  public:
+		  F(const vector<double>& vv, double∗ p) :v{vv}, res{p} { }
+		  void operator()(); // place result in *res
+		  private:
+		  const vector<double>& v; // source of input
+		  double∗res; //target for output
+		};
+
+		int main()
+	   {
+		  vector<double> some_vec;
+		  vector<double> vec2;
+		  // ...
+		  double res1;
+		  double res2;
+		  thread t1 {f,cref(some_vec),&res1}; // f(some_vec,&res1) executes in a separate thread
+		  thread t2 {F{vec2,&res2}}; // F{vec2,&res2}() executes in a separate thread
+		  t1.join();
+		  t2.join();
+		  cout << res1 << ' ' << res2 << '\n';
+		}
+
+	4. Sharing data and deadlock
+		The solution is mutex, a "mutual exclusion object". A thread acquires a mutex using a lock() operation.
+		
+		mutex m; // controlling mutex
+		in sh; 	// shared data
+
+		void f(){
+			unique_lock<mutex> lck{m}; // acquire mutex
+			sh += 7;
+			// release mutex IMPLICITLY
+		}
+		
+		the unique_lock-s constructor acquires the mutex (through a call m.lock()). If another thread has already acquired the mutex
+		the thread waits until the other thread completes its access.  Once a thread has completed its access to the shared data, the
+		unique_lock release the mutex (with a call m.unlock()), 
+
+		in cases there are muliple resources to be acquired, to adoid deadlock:
+		void f(){
+			unique_lock<mutex> lck1{m1, defer_lock}; // defer_lock: donnot yet try to acquired the muext
+			unique_lock<mutex> lck1{m2, defer_lock}; // defer_lock: donnot yet try to acquired the muext
+			unique_lock<mutex> lck1{m3, defer_lock}; // defer_lock: donnot yet try to acquired the muext
+			//...
+			lock(lck1, lck2, lck3);
+			// manipulate shared data...
+		} //  impplicity release all mutexes
+		this lock will proceeded only after acquiring all its mutex arguments and will never "back" ("go to sleep") while 
+		holding a mutex. 
+		the destructor for the individual unique_locks ensure that the mutexes are released when a thread leaves the scope.
+
+		Shared data could be be inferior to the notion of call and return.
+
+	5. Waiting for events.
+		Sometime, a thread needs to wait for some kind of external event, such as another thread completing a task or a certain
+		amount of time having passed. the simplest "event" is simply time passing. <chrono>
+
+			----- example of tracing run time (no thread)
+				  include <chrono>
+				  ...
+				  using namespace std::chrono;
+				  auto t0 = hih_resolution_clock::now();
+				  this_thread::sleep_for(millseconds{20});
+				  auto t1=high_resolution_clock::now();
+				  cout << duration_cast<nanoseconds>(t1-t0).count() << "nanoseconds passed\n";
+				  use duration_cast to adjust the clock-s unit to the nanoseconds. 
+			-------
+
+		The basic support for communicating using external events is provided by condition_variables. 
+		
+		class Message{	// object to be communicated
+			//...
+		};
+
+		queue<Message> mqueue;		// the queue of messsages
+		condition_variable mcond;	// the variable communicating events
+		mutex mmutex;					// the locking mechanism
+		
+		void consumer(){
+			while (true){
+				unique_lock<mutex> lck{mmutex};
+				while (mcond.wait(lck)) /*don thing */ // release lck and wait;
+																	// re-acquire lck upon wakeup
+				
+				auto m = mqueue.front(); 					// get the message
+				mqueue.pop(); 									// release lck
+				// ... process m...
+			}
+		}
+
+		void producer(){
+			while(true){
+				Message m;
+				// fill the message
+				unique_lock<mutex> lck {mmutex}; 	//protect operations
+				mqueue.push(m);
+				mcond.notify_)one() 		// notify
+			}	// release lock (while scope release)
+		}
+
+		Here condtion_variable release its lock in consumer() until that wait is over. (receiving mcond.notify_one() from producer?)
 		
 		
+	5. Communication Tasks <future>
+		1. future and promise
+			For returning a value from a task spawned on a separate thread	
+			The basic idea is simple: when a task wants to pass a value to another, it puts the value into a promise. Somehow, this value
+			will appear in the corresponding future, from which it can be read (typically be the launcher of the task).
+
+			void f(promise<X>& px){ // a task: place the resul in px
+				//...
+				try {
+					X res;
+					//... do something with res
+					px.set_value(res);
+				}catch(...){
+					px.set_exception(current_exception()); // pass the exception to the future-s thread
+					// current_exception() refers to the caught exception.
+				}
+			}
+
+			The main purpose for promise is to provide a simple put operation set_vaalue() and set_exception to match future-s get().
+			
+			void g(future<X> &fx)[
+				//...
+				try{
+					X v=fx.get();
+					// ... use v...
+				} catch(...){
+					//... handle error..
+				}
+			}
+			
+			NO LOCK
+			
+		2. packaged_task
+			To help launch tasks and connect up the mechanisms for returning a result
+
+		  // compute the sum of [beg:end) starting with the initial value init
+		  double accum(double∗ beg, double∗ end, double init) {
+				return accumulate(beg,end,init);
+   		}
+
+   	  double comp2(vector<double>& v) {
+			 using Task_type = double(double∗,double∗,double); // type of task
+			 packaged_task<Task_type> pt0 {accum}; // package the task (i.e., accum)
+			 packaged_task<Task_type> pt1 {accum};
+			 future<double> f0 {pt0.get_future()}; ------>  // get HOLD of pt0’s future
+			 future<double> f1 {pt1.get_future()}; -------> // get HOLD of pt1’s future
+			 double∗ first = &v[0];
+			 thread t1 {move(pt0),first,first+v.siz e()/2,0}; // star t a thread for pt0
+			 thread t2 {move(pt1),first+v.siz e()/2,first+v.siz e(),0}; // star t a thread for pt1
+			 // ...
+			 return f0.get()+f1.g et(); // get the results
+        }
+
+			the packaged_task template takes the type of the task as its template argument(here Task_type, an
+			alias for double(double*, double*, double) and the task as its constructor argument(here, accum). 
+			the move(0 operations are needed because a packaged_task cannot be copied because it is a resource
+			handler: it owns its promise and is(indirectly) responsible for whatever resources its task may own.
+
+			NO LOCK.
+			
+		3. async() ---> can we use dynamic task count?
+			For launching of a task in a manner very similar to calling a function
+			to launch tasks to potentially run asynchronously, we can use async().
+
+			double comp4(vector<double>& v){
+				if (v.size() < 1000)
+					return accum(v.begin(0, v.end(), 0.0);
+
+				auto v0 = &v[0];
+				auto sz = v.size();
+				auto f0 = async(accum, v0, v0+sz/4, 0.0); // first quater
+				auto f1 = async(accum, v0+sz/4, v0+sz/2, 0.0); 
+				auto f2 = async(accum, v0+sz/2, v0+sz*3/4, 0.0); 
+				auto f3 = async(accum, v0+sz*3/4, v0+sz, 0.0); 
+				return f0.get() + f1.get() + f2.get() + f3.get();
+			}
+
+			async() cabn also be used to spawn a task for getting info from user. leving the "main program" active with something else.
+
+			NO LOCK
+
+		4. The standard-library concurrency facilities are type safe.
+		5. Atomics allow for lock-free programming
+		6. Leave lock-free programming to experts
+		7. A thread is a type-safe interface to a system thread
+		8. User join() to wait for a thread to complete
+		9. Prefer package_task and future over direct use of threads and mutexs
+		10. Return a result using promise and get a result from a future
+	   11. use packaged_tasks to handle exceptions thrown by tasks and to arrange for value return.
+		12. use a packaged_task and future to express a request to an external service and wait for its response.
+		13. Use async() to launch simple task
+				
+	
 
 # VI
    set spell spelllang=en_us
    set syntax=c++/java/latex/python...
    set tabstop=3 softtabstop=0 noexpandtab shiftwidth=3
    set guifont=Lucida_Console:h10  
+   spell ]s-> find next. z= -> spell suggetion zg -> add word to dictionary
 
 #change git default editor:
 	Add gvim path to system PATH (e.g C:\Programs Files (x86)\Vim\vim74
