@@ -102,6 +102,48 @@ public:
         else return 0;
     }
 };
+
+start----->  my solution
+int ladder_length(vector<string>& input, string& start, string& end){
+   stack<string> stack1; // current word list
+   unordered_set<string> visited;
+   stack<string> stack2;      // next level work list
+   bool found = false;
+   int level = 0;
+
+   stack1.push(start);
+   visited.insert(start);
+   while(!found && !stack1.empty()){
+      level++;
+      while(!stack1.empty()){
+         string this_word{stack1.top()};
+         if (this_word == end) return level;
+         for (int i=0; i< this_word.length(); i++){
+            for (char j = 'a'; j <= 'z'; j++){
+               string temp_word{this_word};
+               temp_word[i] = j;
+               if (temp_word == end) return ++level;
+               if (find(dict.begin(), dict.end(),temp_word)!= dict.end() && !(visited.count(temp_word)>0)){
+               //if (!(visited.count(temp_word)>0)){ ----> in case fake words are allowed. but in this case we should only compared different character in the two words.
+                  visited.insert(temp_word);
+                  stack2.push(temp_word);
+               }
+            }
+         }
+         stack1.pop();
+      }
+      while (!stack2.empty()){
+         stack1.push(stack2.top());
+         stack2.pop();
+      }
+   }
+   return -1;
+}
+end----->  my solution
+
+
+
+
 \end{Code}
 
 
